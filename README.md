@@ -2,8 +2,6 @@
 Simulates Leetcode website by creating a solution program, user generated program, and test cases. Automated checking of all test cases with runtests.py in root directory. To compare the user generated program to the solution on the given test cases for specific problem run
 ```
 $ python3 runtests.py [problem_directory_name]
-        OR
-$ make [problem_directory_name]
 ```
 To run all test cases for all the problems run the following
 ```
