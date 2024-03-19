@@ -1,5 +1,4 @@
 '''
-2024 Mar 10
 Solution for sudoku
 '''
 from typing import List
