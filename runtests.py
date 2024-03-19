@@ -37,7 +37,7 @@ PARAMETERS: path object - path to the script being run
             path object - path to the test case
 RETURNS: output, error
 '''
-def outputProgram(script:Path, test_case:Path):
+def outputProgram(script:Path, test_case:Path) -> tuple[bytes, bytes]:
     with Popen([PYTHON, script, test_case], stdout=PIPE, stderr=PIPE) as process:
         output, error = [out.decode('utf-8') for out in process.communicate()]
     return output, error
