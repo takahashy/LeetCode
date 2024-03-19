@@ -1,6 +1,4 @@
 '''
-2024 Mar 10
-
 solving a sudoku board. Given a 9 x 9 board in a file solve the sudoku if it
 can be solved and return that board
 '''
