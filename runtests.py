@@ -1,4 +1,5 @@
 '''
+runtest
 2024 Mar 13
 
 Script that compares the solution output and the user solved output based on the
@@ -212,6 +213,6 @@ subprocess module
     
     Popen.communicate - returns output and error of program run but usually decode
                         to get readable output
-                        out.decode('utf-8')
+                        out.decode('utf-8') for out in Popen.communicate()
                  
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
