@@ -8,8 +8,11 @@ test each subdirectory
         -> solution.py = ground truth program
         -> [name].py   = user solved program
         -> test        = directory of testcases all with .in ext (test[num].in)
+
+Also run unit or batch test cases for problems.
 '''
 import sys
+from typing import List
 from pathlib import Path
 from subprocess import PIPE, Popen
 
@@ -42,6 +45,22 @@ def outputProgram(script:Path, test_case:Path) -> tuple[bytes, bytes]:
         output, error = [out.decode('utf-8') for out in process.communicate()]
     return output, error
 
+'''
+PURPOSE: print the output of program and any errors
+PARAMETERS: path object   - path to script program
+            list of paths - paths to test cases
+RETURNS: None
+'''
+def printOutput(script:Path, test_cases:List[Path]) -> None:
+    global FAILED
+    for test in test_cases:
+        output, error = outputProgram(script, test)
+        if error != "":
+            print(f"\033[91m{test.name} FAILED\033[0m\n\033[4mExpected NO ERRORs but got\033[0m:\n{error}")
+            FAILED = True
+        else:
+            print(f"\033[92m{test.name} RAN AS EXPECTED.\033[0m\n{output}")
+        
 
 '''
 PURPOSE: compare the outputs of the user generated program and the solution on
@@ -49,7 +68,7 @@ PURPOSE: compare the outputs of the user generated program and the solution on
 PARAMETERS: path object - path to subdirectory
 RETURNS: None
 '''
-def runTest(problem:Path) -> None:
+def compareOutput(problem:Path) -> None:
     global FAILED
     tests    = problem / TEST_DIR
     solution = problem / SOLUTION
@@ -76,45 +95,96 @@ def runTest(problem:Path) -> None:
         else:
             print(f"\033[92m{test.name} PASSED. Same output\033[0m")    
 
+'''
+PURPOSE: run unit or batch tests on problem
+PARAMETERS: list of paths - paths to the problem directory
+            string        - "solution" or "user"
+            string        - "all" or number
+RETURNS: None
+'''
+def runTest(problems:List[Path], program:str, test_case:str) -> None:
+    for problem in problems:
+        print(f"\n\033[1m-------------------------- {problem.name} ---------------------------\033[0m")
+        tests = problem / TEST_DIR
+        pathExists(tests, "directory")
+        test_cases = []
+            
+        if test_case == "all":
+            # batch tests
+            for test in tests.iterdir():
+                test_cases.append(test)
+        elif test_case.isdigit():
+            # check test case exists
+            pattern = '*' + test_case + '.in'
+            for file in tests.glob(pattern):
+                test_cases.append(file)
+            
+            if len(test_cases) == 0:
+                print(f"\033[91m\033[4mINVALID TEST INPUT\033[0m: Test #{test_case} does not exist in {problem.name}\033[0m")
+                sys.exit(1)
+        else:
+            print("\033[91m\033[4mINVALID COMMAND\033[0m: INDEX 3 should be 'all' or a test number\033[0m")
+            sys.exit(1)
+
+        # run solution or user generated program
+        if program == "solution":
+            solution = problem / SOLUTION
+            pathExists(solution, "file")
+            printOutput(solution, test_cases)       
+        elif program == "user":
+            user_gen  = (problem / problem.name).with_suffix('.py')
+            pathExists(user_gen, "file")
+            printOutput(user_gen, test_cases)
+        else:
+            print("\033[91m\033[4mINVALID COMMAND\033[0m: INDEX 2 should be 'solution' or 'user'\033[0m")
+            sys.exit(1)
+        
 
 '''
 PURPOSE: run all test cases or a specific subdirectory
 PARAMETERS: string - 'all' or 'name' of a subdirectory to run
 RETURNS: None
 '''
-def main(arg:str) -> None:
+def main(args:str) -> None:
     tests = []
     
-    # append all subdirectory abs paths to tests
-    if arg == "all":
+    if args[0] == "all":
+        # append all subdirectory abs paths to tests
         for items in CURR_DIR.iterdir():
             if items.is_dir() and (items != CURR_DIR / ".git"):
-                tests.append(items)
-    
-    # append specified subdir abs path to tests
+                tests.append(items) 
     else:
-        subdir = CURR_DIR / arg
+        # append specified subdir abs path to tests
+        subdir = CURR_DIR / args[0]
         if subdir.exists() and subdir.is_dir():
             tests.append(subdir)
+        else:
+            print("\033[91m\033[4mINVALID COMMAND\033[0m: INDEX 1 should be an existing directory\033[0m")
+            sys.exit(1)
     
-    # run each subdir
-    for test in tests:
-        runTest(test)
+    if len(args) > 1:
+        # running unit or batch tests
+        runTest(tests, args[1], args[2])
+    else:
+        # comparing outputs
+        for test in tests:
+            compareOutput(test)   
+        print()
     
     # final check
     if FAILED:
-        print(f"\n\033[91mSome tests failed. Check above\033[0m")
+        print(f"\033[91mSome tests failed. Check above\033[0m")
     else:
-        print(f"\n\033[92mALL TESTS PASSED!")
+        print(f"\033[92mALL TESTS PASSED!")
 
 
 
 if __name__ == '__main__':
-    if len(sys.argv) != 2:
-        print(f"\033[91m\033[4mUsage\033[0m\033[0m: python3 runtests.py [all|dir_name]")
+    if (len(sys.argv) != 2) and (len(sys.argv) != 4):
+        print(f"\033[91m\033[4mUsage\033[0m\033[0m: python3 runtests.py [all|dir_name] solution|user [all|number]")
         sys.exit(1)
         
-    main(sys.argv[1])
+    main(sys.argv[1:])
     
     
     
