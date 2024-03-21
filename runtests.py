@@ -82,7 +82,7 @@ def compareOutput(problem:Path) -> None:
     
     print(f"\n\033[1m-------------------------- {problem.name} ---------------------------\033[0m")
     # for each test case compare the outputs of solution.py and user_generated
-    test_cases = sorted([test for test in tests.iterdir()])
+    test_cases = sorted([test for test in tests.iterdir()], key=lambda test: int(test.name.lstrip('test').rstrip('.in')))
     for test in test_cases:
         gt_out, _ = outputProgram(solution, test)
         us_out, e = outputProgram(user_gen, test)
@@ -114,6 +114,7 @@ def runTest(problems:List[Path], program:str, test_case:str) -> None:
             # batch tests
             for test in tests.iterdir():
                 test_cases.append(test)
+                test_cases.sort(key=lambda test: int(test.name.lstrip('test').rstrip('.in')))
         elif test_case.isdigit():
             # check test case exists
             pattern = '*' + test_case + '.in'
