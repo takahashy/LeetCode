@@ -47,3 +47,13 @@ test_max_freq_stack_solution:
 
 test_max_freq_stack_user:
 	@python3 runtests.py max_freq_stack user all
+
+# n queens
+compare_n_queens:
+	@python3 runtests.py n_queens
+
+test_n_queens_solution:
+	@python3 runtests.py n_queens solution all
+
+test_n_queens_user:
+	@python3 runtests.py n_queens user all

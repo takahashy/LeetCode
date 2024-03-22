@@ -28,19 +28,19 @@ def validateInput(snum1:List[str], snum2:List[str], sk:str):
     if snum1 != '':
         num1 = [int(num) for num in snum1.split()]
     else:
-        print("\033[91m\033[4mTEST CASE ERROR\033[0m: List cannot be empty\033[0m")
+        print("\033[91m\033[4mINVALID TEST CASE\033[0m: List cannot be empty\033[0m")
         sys.exit(1)
     
     if snum2 != '':
         num2 = [int(num) for num in snum2.split()]
     else:
-        print("\033[91m\033[4mTEST CASE ERROR\033[0m: List cannot be empty\033[0m")
+        print("\033[91m\033[4mINVALID TEST CASE\033[0m: List cannot be empty\033[0m")
         sys.exit(1)
 
     if 0 <= int(sk) <= len(num1) * len(num2):
         k = int(sk)
     else:
-        print("\033[91m\033[4mTEST CASE ERROR\033[0m: 0 <= k <= num1.length * num2.length")
+        print("\033[91m\033[4mINVALID TEST CASE\033[0m: 0 <= k <= num1.length * num2.length")
         sys.exit(1)
         
     return num1, num2, k
@@ -55,10 +55,9 @@ def readFile(file_path:str) -> tuple[int, int, int]:
             
     except FileNotFoundError as file_not_found:
         print(file_not_found)
-        sys.exit(1)
     except IsADirectoryError as is_dir:
         print(is_dir)
-        sys.exit(1)
+    sys.exit(1)
 
 def main(arg) -> None:
     snum1, snum2, sk = readFile(arg)
