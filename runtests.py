@@ -192,15 +192,16 @@ if __name__ == '__main__':
     
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 Pathlib methods
+    p.suffix    - get the extension of file(.txt, .pdf, .cpp)
+    p.name      - get the name of the file including extension
     p.iterdir() - iterate through all files and subdirectories in `p` directory
     p.is_file() - check if `p` is a file
     p.is_dir()  - check if `p` is a directory
-    p.suffix    - get the extension of file(.txt, .pdf, .cpp)
-    p.name      - get the name of the file including extension
     p.exists()  - check whether `p` exists
     p.cwd()     - current working directory
     p.glob(ptn) - given a pattern searches in the current directory (ptn = '*.py')
     p.rglob(ptn)- given a pattern searches in current and subdirectories
+    p.rename(np)- rename the p file path to np file path
     p / "str.py"- returns the path object of "p/str.py" 
     
 subprocess module
