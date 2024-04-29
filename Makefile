@@ -57,3 +57,13 @@ test_n_queens_solution:
 
 test_n_queens_user:
 	@python3 runtests.py n_queens user all
+
+# minimum genetic mutation
+compare_minimum_genetic_mutation:
+	@python3 runtests.py minimum_genetic_mutation
+
+test_minimum_genetic_mutation_solution:
+	@python3 runtests.py minimum_genetic_mutation solution all
+
+test_minimum_genetic_mutation_user:
+	@python3 runtests.py minimum_genetic_mutation user all
