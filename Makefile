@@ -67,3 +67,13 @@ test_minimum_genetic_mutation_solution:
 
 test_minimum_genetic_mutation_user:
 	@python3 runtests.py minimum_genetic_mutation user all
+
+# kSum
+compare_kSum:
+	@python3 runtests.py kSum
+
+test_kSum_solution:
+	@python3 runtests.py kSum solution all
+
+test_kSum_user:
+	@python3 runtests.py kSum user all

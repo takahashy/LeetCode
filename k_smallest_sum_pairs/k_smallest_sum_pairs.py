@@ -31,7 +31,7 @@ def find_k_pairs(num1:List[int], num2:List[int], k:int) -> List[List[int]]:
 
     print(f"The first {k} pairs with smallest sum of \n{num1} and {num2} are\n{result}")
 
-def validateInput(snum1:List[str], snum2:List[str], sk:str):
+def validateInput(snum1:str, snum2:str, sk:str):
     if snum1 != '':
         num1 = [int(num) for num in snum1.split()]
     else:
