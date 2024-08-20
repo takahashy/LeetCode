@@ -1,10 +1,6 @@
 '''
 solution for kSum problem
 '''
-'''
-Given an array nums of n integers, an integer k, and target return an array of 
-all the unique k numbers that sum to target
-'''
 import sys
 from typing import List
 

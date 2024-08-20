@@ -77,3 +77,13 @@ test_kSum_solution:
 
 test_kSum_user:
 	@python3 runtests.py kSum user all
+
+# snapshot
+compare_snapshot:
+	@python3 runtests.py snapshot
+
+test_snapshot_solution:
+	@python3 runtests.py snapshot solution all
+
+test_snapshot_user:
+	@python3 runtests.py snapshot user all
