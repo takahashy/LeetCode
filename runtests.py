@@ -17,12 +17,12 @@ from typing import List
 from pathlib import Path
 from subprocess import PIPE, Popen
 
+ARGC     = len(sys.argv)
 CURR_DIR = Path(__file__).parent
 PYTHON   = "python3"
 SOLUTION = "solution.py"
 TEST_DIR = "tests"
 FAILED   = False
-ARGC     = len(sys.argv)
 
 '''
 PURPOSE: print path not found error if it doesn't exist
@@ -38,6 +38,7 @@ def pathExists(problem:Path, item:str) -> Path:
         
     return path
 
+
 '''
 PURPOSE: runs the passed in script on the test case and returns the output/error
 PARAMETERS: path object - path to the script being run
@@ -48,6 +49,7 @@ def runProgram(script:Path, test_case:Path) -> tuple[bytes, bytes]:
     with Popen([PYTHON, script, test_case], stdout=PIPE, stderr=PIPE) as process:
         output, error = [out.decode('utf-8') for out in process.communicate()]
     return output, error
+
 
 '''
 PURPOSE: print the output of program and any errors
@@ -95,6 +97,7 @@ def compareOutput(problem:Path) -> None:
         else:
             print(f"\033[92m{test.name} PASSED. Same output\033[0m")    
 
+
 '''
 PURPOSE: run unit or batch tests on problem
 PARAMETERS: Path   - path to the problem directory
@@ -136,6 +139,7 @@ def runTest(problem:Path, program:str, test_num:str) -> None:
     
     printOutput(script, test_cases)
 
+
 '''
 PURPOSE: run all test cases or a specific subdirectory
 PARAMETERS: string - 'all' or 'name' of a subdirectory to run
@@ -151,7 +155,10 @@ def main(args:str) -> None:
     else:
         problem = CURR_DIR / args[0]
         if problem.exists() and problem.is_dir():
-            runTest(problem, args[1], args[2])
+            if ARGC > 2:
+                runTest(problem, args[1], args[2])
+            else:
+                compareOutput(problem)
         else:
             print("\033[91m\033[4mINVALID COMMAND\033[0m: INDEX 1 should be an existing directory\033[0m")
             sys.exit(1)
@@ -164,10 +171,7 @@ def main(args:str) -> None:
 
 
 if __name__ == '__main__':
-    if ARGC == 2 and sys.argv[1] != "all":
-        print(f"\033[91m\033[4mUsage\033[0m\033[0m: python3 runtests.py [all|dir_name] solution|user [all|number]")
-        sys.exit(1)
-    elif ARGC != 4:
+    if ARGC != 2 and ARGC != 4:
         print(f"\033[91m\033[4mUsage\033[0m\033[0m: python3 runtests.py [all|dir_name] solution|user [all|number]")
         sys.exit(1)
         

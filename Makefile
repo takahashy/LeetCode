@@ -2,12 +2,6 @@
 compare_all:
 	@python3 runtests.py all
 
-test_user_all:
-	@python3 runtests.py all user all 
-
-test_solution_all:
-	@python3 runtests.py all solution all
-
 # sudoku
 compare_sudoku:
 	@python3 runtests.py sudoku
