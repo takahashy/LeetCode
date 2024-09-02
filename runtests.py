@@ -17,23 +17,26 @@ from typing import List
 from pathlib import Path
 from subprocess import PIPE, Popen
 
-CURR_DIR = Path.cwd()
+CURR_DIR = Path(__file__).parent
 PYTHON   = "python3"
 SOLUTION = "solution.py"
 TEST_DIR = "tests"
 FAILED   = False
+ARGC     = len(sys.argv)
 
 '''
 PURPOSE: print path not found error if it doesn't exist
 PARAMETERS: path object - path to a directory or file
             string      - directory or file
-RETURNS: None
+RETURNS: path object to the subdirectory
 '''
-def pathExists(path:Path, item:str) -> None:
+def pathExists(problem:Path, item:str) -> Path:
+    path = problem / item
     if not path.exists():
-        print(f"\033[91m\033[4mPATH ERROR\033[0m: The {item} {path.name} does not exist\033[0m")
+        print(f"\033[91m\033[4mPATH ERROR\033[0m: The {item} does not exist\033[0m")
         sys.exit(1)
         
+    return path
 
 '''
 PURPOSE: runs the passed in script on the test case and returns the output/error
@@ -41,7 +44,7 @@ PARAMETERS: path object - path to the script being run
             path object - path to the test case
 RETURNS: output, error
 '''
-def outputProgram(script:Path, test_case:Path) -> tuple[bytes, bytes]:
+def runProgram(script:Path, test_case:Path) -> tuple[bytes, bytes]:
     with Popen([PYTHON, script, test_case], stdout=PIPE, stderr=PIPE) as process:
         output, error = [out.decode('utf-8') for out in process.communicate()]
     return output, error
@@ -55,7 +58,7 @@ RETURNS: None
 def printOutput(script:Path, test_cases:List[Path]) -> None:
     global FAILED
     for test in test_cases:
-        output, error = outputProgram(script, test)
+        output, error = runProgram(script, test)
         if error != "":
             print(f"\033[91m{test.name} FAILED\033[0m\n\033[4mExpected NO ERRORs but got\033[0m:\n{error}")
             FAILED = True
@@ -71,21 +74,17 @@ RETURNS: None
 '''
 def compareOutput(problem:Path) -> None:
     global FAILED
-    tests    = problem / TEST_DIR
-    solution = problem / SOLUTION
-    user_gen = (problem / problem.name).with_suffix('.py')
-    
-    # check valid paths
-    pathExists(tests, "directory")
-    pathExists(solution, "file")
-    pathExists(user_gen, "file")
+
+    tests    = pathExists(problem, TEST_DIR)
+    solution = pathExists(problem, SOLUTION)
+    user_gen = pathExists(problem, problem.name + ".py")
+    test_cases = sorted([test for test in tests.iterdir()], key=lambda test: int(test.name.lstrip('test').rstrip('.in')))
     
     print(f"\n\033[1m-------------------------- {problem.name} ---------------------------\033[0m")
     # for each test case compare the outputs of solution.py and user_generated
-    test_cases = sorted([test for test in tests.iterdir()], key=lambda test: int(test.name.lstrip('test').rstrip('.in')))
     for test in test_cases:
-        gt_out, _ = outputProgram(solution, test)
-        us_out, e = outputProgram(user_gen, test)
+        gt_out, _ = runProgram(solution, test)
+        us_out, e = runProgram(user_gen, test)
         
         if e != "":
             print(f"\033[91m{test.name} FAILED\033[0m\n\033[4mExpected NO ERRORs but got\033[0m:\n{e}")
@@ -98,49 +97,44 @@ def compareOutput(problem:Path) -> None:
 
 '''
 PURPOSE: run unit or batch tests on problem
-PARAMETERS: list of paths - paths to the problem directory
-            string        - "solution" or "user"
-            string        - "all" or number
+PARAMETERS: Path   - path to the problem directory
+            string - "solution" or "user"
+            string - "all" or number
 RETURNS: None
 '''
-def runTest(problems:List[Path], program:str, test_case:str) -> None:
-    for problem in problems:
-        print(f"\n\033[1m-------------------------- {problem.name} ---------------------------\033[0m")
-        tests = problem / TEST_DIR
-        pathExists(tests, "directory")
-        test_cases = []
-            
-        if test_case == "all":
-            # batch tests
-            for test in tests.iterdir():
-                test_cases.append(test)
-                test_cases.sort(key=lambda test: int(test.name.lstrip('test').rstrip('.in')))
-        elif test_case.isdigit():
-            # check test case exists
-            pattern = '*' + test_case + '.in'
-            for file in tests.glob(pattern):
-                test_cases.append(file)
-            
-            if len(test_cases) == 0:
-                print(f"\033[91m\033[4mINVALID TEST INPUT\033[0m: Test #{test_case} does not exist in {problem.name}\033[0m")
-                sys.exit(1)
-        else:
-            print("\033[91m\033[4mINVALID COMMAND\033[0m: INDEX 3 should be 'all' or a test number\033[0m")
-            sys.exit(1)
-
-        # run solution or user generated program
-        if program == "solution":
-            solution = problem / SOLUTION
-            pathExists(solution, "file")
-            printOutput(solution, test_cases)       
-        elif program == "user":
-            user_gen  = (problem / problem.name).with_suffix('.py')
-            pathExists(user_gen, "file")
-            printOutput(user_gen, test_cases)
-        else:
-            print("\033[91m\033[4mINVALID COMMAND\033[0m: INDEX 2 should be 'solution' or 'user'\033[0m")
-            sys.exit(1)
+def runTest(problem:Path, program:str, test_num:str) -> None:
+    print(f"\n\033[1m-------------------------- {problem.name} ---------------------------\033[0m")
+    tests = pathExists(problem, TEST_DIR)
+    test_cases = []
         
+    # batch tests
+    if test_num == "all":
+        test_cases = sorted([test for test in tests.iterdir()], key=lambda test: int(test.name.lstrip('test').rstrip('.in')))
+
+    # check test case exists
+    elif test_num.isdigit():
+        pattern = '*' + test_num + '.in'
+        for file in tests.glob(pattern):
+            test_cases.append(file)
+        
+        if len(test_cases) == 0:
+            print(f"\033[91m\033[4mINVALID TEST INPUT\033[0m: Test #{test_num} does not exist in {problem.name}\033[0m")
+            sys.exit(1)
+    else:
+        print("\033[91m\033[4mINVALID COMMAND\033[0m: INDEX 3 should be 'all' or a test number\033[0m")
+        sys.exit(1)
+
+    # run solution or user generated program
+    script = ""
+    if program == "solution":
+        script = pathExists(problem, SOLUTION)    
+    elif program == "user":
+        script = pathExists(problem, problem.name + ".py")
+    else:
+        print("\033[91m\033[4mINVALID COMMAND\033[0m: INDEX 2 should be 'solution' or 'user'\033[0m")
+        sys.exit(1)
+    
+    printOutput(script, test_cases)
 
 '''
 PURPOSE: run all test cases or a specific subdirectory
@@ -148,31 +142,20 @@ PARAMETERS: string - 'all' or 'name' of a subdirectory to run
 RETURNS: None
 '''
 def main(args:str) -> None:
-    tests = []
-    
     if args[0] == "all":
-        # append all subdirectory abs paths to tests
-        for items in CURR_DIR.iterdir():
-            if items.is_dir() and (items != CURR_DIR / ".git"):
-                tests.append(items) 
+        for subdir in CURR_DIR.iterdir():
+            if subdir.is_dir() and (subdir != CURR_DIR / ".git"):
+                compareOutput(subdir)
+            print()
+    
     else:
-        # append specified subdir abs path to tests
-        subdir = CURR_DIR / args[0]
-        if subdir.exists() and subdir.is_dir():
-            tests.append(subdir)
+        problem = CURR_DIR / args[0]
+        if problem.exists() and problem.is_dir():
+            runTest(problem, args[1], args[2])
         else:
             print("\033[91m\033[4mINVALID COMMAND\033[0m: INDEX 1 should be an existing directory\033[0m")
             sys.exit(1)
-    
-    if len(args) > 1:
-        # running unit or batch tests
-        runTest(tests, args[1], args[2])
-    else:
-        # comparing outputs
-        for test in tests:
-            compareOutput(test)   
-        print()
-    
+
     # final check
     if FAILED:
         print(f"\033[91mSome tests failed. Check above\033[0m")
@@ -180,9 +163,11 @@ def main(args:str) -> None:
         print(f"\033[92mALL TESTS PASSED!")
 
 
-
 if __name__ == '__main__':
-    if (len(sys.argv) != 2) and (len(sys.argv) != 4):
+    if ARGC == 2 and sys.argv[1] != "all":
+        print(f"\033[91m\033[4mUsage\033[0m\033[0m: python3 runtests.py [all|dir_name] solution|user [all|number]")
+        sys.exit(1)
+    elif ARGC != 4:
         print(f"\033[91m\033[4mUsage\033[0m\033[0m: python3 runtests.py [all|dir_name] solution|user [all|number]")
         sys.exit(1)
         
