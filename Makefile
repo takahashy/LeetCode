@@ -2,6 +2,12 @@
 compare_all:
 	@python3 runtests.py all
 
+test_user_all:
+	@python3 runtests.py all user all 
+
+test_solution_all:
+	@python3 runtests.py all solution all
+
 # sudoku
 compare_sudoku:
 	@python3 runtests.py sudoku
@@ -81,3 +87,13 @@ test_snapshot_solution:
 
 test_snapshot_user:
 	@python3 runtests.py snapshot user all
+
+# build expression
+compare_build_expression:
+	@python3 runtests.py build_expression
+
+test_build_expression_solution:
+	@python3 runtests.py build_expression solution all
+
+test_build_expression_user:
+	@python3 runtests.py build_expression user all
